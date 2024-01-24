@@ -86,11 +86,14 @@ build_dir_analysis() {
 	fi
 	
 	local -a app_dirs
-	mapfile -t app_dirs <<< "$(find "$build_dir" -type d -name app)"
+	app_dirs=($(find "$build_dir" -type d -name app))
 
 	local -a executables
+	executables=()
 	for dir in "${app_dirs[@]}"; do
-		executables+=($(find "$dir" -type f -executable))
+	while IFS= read -r -d $'\0' file; do
+		executables+=("$(basename "$file")")
+		done < <(find "$dir" -type f -executable -print0)
 	done
 	
 	if [[ -z "${executables[*]}" ]]; then
